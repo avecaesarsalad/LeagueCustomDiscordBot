@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Reflection;
+using Newtonsoft.Json;
 
 namespace LeagueCustomBot.json;
 
@@ -9,7 +10,7 @@ internal class JsonReader
     
     public async Task ReadJson()
     {
-        using var streamReader = new StreamReader(@"C:\Users\japog\RiderProjects\LeagueCustomBot\LeagueCustomBot\config\config.json");
+        using var streamReader = new StreamReader("../../../config/config.json");
         
         var json = await streamReader.ReadToEndAsync();
         var data = JsonConvert.DeserializeObject<JsonStructure>(json);

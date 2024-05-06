@@ -9,54 +9,54 @@ using LeagueCustomBot.json;
 using LeagueCustomBot.resx;
 using LeagueCustomBot.teamcreator;
 
-namespace LeagueCustomBot;
-
-internal static class Program
+namespace LeagueCustomBot
 {
-    private static DiscordClient Client { get; set; } = null!;
-    private static CommandsNextExtension Commands { get; set; } = null!;
-    private static SlashCommandsExtension SlashCommands { get; set; } = null!;
-
-    [Obsolete("Obsolete")]
-    static async Task Main(string[] args)
+    internal static class Program
     {
-        var jsonReader = new JsonReader();
-        await jsonReader.ReadJson();
+        private static DiscordClient Client { get; set; } = null!;
+        private static CommandsNextExtension Commands { get; set; } = null!;
+        [Obsolete("Obsolete")] private static SlashCommandsExtension SlashCommands { get; set; } = null!;
 
-        var discordConfig = new DiscordConfiguration()
+        [Obsolete("Obsolete")]
+        static async Task Main(string[] args)
         {
-            Intents = DiscordIntents.All,
-            Token = jsonReader.Token,
-            TokenType = TokenType.Bot,
-            AutoReconnect = true,
-        };
+            var jsonReader = new JsonReader();
+            await jsonReader.ReadJson();
 
-        Client = new DiscordClient(discordConfig);
+            var discordConfig = new DiscordConfiguration()
+            {
+                Intents = DiscordIntents.All,
+                Token = jsonReader.Token,
+                TokenType = TokenType.Bot,
+                AutoReconnect = true,
+            };
 
-        Client.ComponentInteractionCreated += Client_ComponentInteractionCreated;
-        
-        SlashCommands = Client.UseSlashCommands();
-        
-        SlashCommands.RegisterCommands<BasicCommands>();
-        
+            Client = new DiscordClient(discordConfig);
+
+            Client.ComponentInteractionCreated += Client_ComponentInteractionCreated;
+
+            SlashCommands = Client.UseSlashCommands();
+
+            SlashCommands.RegisterCommands<BasicCommands>();
 
         await Client.ConnectAsync();
         await Task.Delay(-1);
     }
 
-    private static async Task Client_ComponentInteractionCreated(DiscordClient sender,
-        ComponentInteractionCreateEventArgs args)
-    {
-        switch (args.Interaction.Data.CustomId)
+        private static async Task Client_ComponentInteractionCreated(DiscordClient sender,
+            ComponentInteractionCreateEventArgs args)
         {
-            case "start":
-                await StaticCommands.StartLobby(args.Interaction);
-                break;
-            case "roll":
-                await StaticCommands.RollTeams(args.Interaction);
-                break;
-            default:
-                break;
+            switch (args.Interaction.Data.CustomId)
+            {
+                case "start":
+                    await StaticCommands.StartLobby(args.Interaction);
+                    break;
+                case "roll":
+                    await StaticCommands.RollTeams(args.Interaction);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
