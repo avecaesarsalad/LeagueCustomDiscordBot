@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LeagueCustomBot.resx;
 
 namespace LeagueCustomBot.teamcreator
 {
     public class TeamCreator
     {
         private static TeamCreator? _instance;
-        private static readonly Random _random = new();
+        private static readonly Random Random = new();
 
-        private bool _lobbyExisting = false;
+        private bool _lobbyRunning;
 
         private List<Player> _allPlayers = new();
         private List<Player> _redPlayers = new();
@@ -22,21 +23,22 @@ namespace LeagueCustomBot.teamcreator
             get { return _instance ??= new TeamCreator(); }
         }
 
-        public string AddPlayerToList(Player player)
+        public bool AddPlayerToList(Player player)
         {
-            if (!_lobbyExisting) return "No lobby running, please use /start-lobby!";
+            
+            if (!_lobbyRunning) return false;
 
-            if (_allPlayers.Count >= 10) return "Lobby already full!";
+            if (_allPlayers.Count >= 10) return false;
 
-            if (_allPlayers.FirstOrDefault(x => x.Name == player.Name) != null) return "You are already in the lobby!";
+            if (_allPlayers.FirstOrDefault(x => x.Name == player.Name) != null) return false;
 
             _allPlayers.Add(player);
-            return "You joined! Lobby count: (" + _allPlayers.Count +  "/10)";
+            return true;
         }
 
         public bool RemovePlayerFromList(string name)
         {
-            if (!_lobbyExisting) return false;
+            if (!_lobbyRunning) return false;
             
             var playerToRemove = _allPlayers.FirstOrDefault(x => x.Name == name);
             if (playerToRemove == null) return false;
@@ -44,17 +46,21 @@ namespace LeagueCustomBot.teamcreator
             return true;
         }
 
-        public string Roll()
+        public bool PlayerExists(string name)
         {
-            if (!_lobbyExisting) return "Please start lobby first with /start-lobby";
+            return _allPlayers.FirstOrDefault(x => x.Name == name) != null;
+        }
 
-            if (_allPlayers.Count < 10) return "Please add more players";
+        public bool Roll()
+        {
+            if (!_lobbyRunning) return false;
+
+            if (_allPlayers.Count < 10) return false;
             
             RollTeams();
             RollRoles(_redPlayers);
             RollRoles(_bluePlayers);
-
-            return PrintTeams();
+            return true;
         }
 
         private void RollTeams()
@@ -191,20 +197,36 @@ namespace LeagueCustomBot.teamcreator
             return sortedList;
         }
 
-        private string PrintLobbyMembers()
+        public string PrintLobbyMembers()
         {
             var output = new StringBuilder();
+            output.AppendLine("**Current Lobby (" + _allPlayers.Count + "/10):**");
 
-            foreach (var player in _allPlayers)
+            if (_allPlayers.Count > 0)
             {
-                output.AppendLine("Name: " + player.Name + "  1:" + player.FirstRole + "  2:" + player.SecondRole +
-                                  "  Rating:" + player.Rank);
-            }
+                var maxNameLength = _allPlayers.Max(player => player.Name.Length);
+                var maxFirstRoleLength = _allPlayers.Max(player => player.FirstRole.ToString().Length);
+                var maxSecondRoleLength = _allPlayers.Max(player => player.SecondRole.ToString().Length);
+                var maxRatingLength = _allPlayers.Max(player => player.Rank.ToString().Length);
+                
+                var format = "Name: **{0,-" + (maxNameLength + 2) + "}** 1: **{1,-" + (maxFirstRoleLength + 6) + "}** 2: **{2,-" + (maxSecondRoleLength + 6) + "}** Rating: **{3,-" + (maxRatingLength + 2) + "}**";
 
+                foreach (var player in _allPlayers)
+                {
+                    output.AppendLine(string.Format(format, player.Name, player.FirstRole, player.SecondRole, player.Rank));
+                }
+
+                if (_allPlayers.Count == 10)
+                {
+                    output.AppendLine(BotResources.LobbyReady);
+                }
+            }
+    
             return output.ToString();
         }
 
-        private string PrintTeams()
+
+        public string PrintTeams()
         {
             var output = new StringBuilder();
 
@@ -214,7 +236,7 @@ namespace LeagueCustomBot.teamcreator
             output.AppendLine("Red Team:");
             foreach (var rPlayer in sortByRoleRed)
             {
-                output.AppendLine(rPlayer.Name + "(" + ((int)rPlayer.Rank) + ") : " + rPlayer.SelectedRole);
+                output.AppendLine(rPlayer.Name + "(" + (rPlayer.Rank) + ") : " + rPlayer.SelectedRole);
             }
             output.AppendLine("Total score: " + _redPlayers.Sum(x => (int)x.Rank));
             output.AppendLine();
@@ -222,12 +244,12 @@ namespace LeagueCustomBot.teamcreator
             output.AppendLine("Blue Team:");
             foreach (var bPlayer in sortByRoleBlue)
             {
-                output.AppendLine(bPlayer.Name + "(" + ((int)bPlayer.Rank) + ") : " + bPlayer.SelectedRole);
+                output.AppendLine(bPlayer.Name + "(" + (bPlayer.Rank) + ") : " + bPlayer.SelectedRole);
             }
             output.AppendLine("Total score: " + _bluePlayers.Sum(x => (int)x.Rank));
             output.AppendLine();
 
-            output.AppendLine("Teamdiff: " + GetTeamScoreDifference());
+            output.AppendLine("Teamdiff: " + GetTeamScoreDifference() + " Rank");
 
             return output.ToString();
         }
@@ -240,7 +262,7 @@ namespace LeagueCustomBot.teamcreator
             while (n > 1)
             {
                 n--;
-                var k = _random.Next(n + 1);
+                var k = Random.Next(n + 1);
                 (shuffledList[k], shuffledList[n]) = (shuffledList[n], shuffledList[k]);
             }
 
@@ -262,33 +284,33 @@ namespace LeagueCustomBot.teamcreator
             }
         }
 
-        public string StartLobby()
+        public bool StartLobby()
         {
-            if (_lobbyExisting) return "Lobby already running, please use /restart-lobby";
+            if (_lobbyRunning) return false;
             
-            _lobbyExisting = true;
+            _lobbyRunning = true;
             _allPlayers = [];
             _redPlayers = [];
             _bluePlayers = [];
-            return "Lobby started!";
+            return true;
         }
 
-        public string RestartLobby()
+        public void RestartLobby()
         {
-            if (!_lobbyExisting) return "No Lobby running, please use /start-lobby";
-            
+            _lobbyRunning = true;
             _allPlayers = [];
             _redPlayers = [];
             _bluePlayers = [];
-            return "Lobby restarted!";
         }
 
-        public string ShowLobby()
+        public bool LobbyFull()
         {
-            if (!_lobbyExisting) return "No Lobby running, please use /start-lobby";
+            return _allPlayers.Count == 10;
+        }
 
-            var text = PrintLobbyMembers();
-            return text == "" ? "Nobody in Lobby yet!" : text;
+        public bool LobbyRunning()
+        {
+            return _lobbyRunning;
         }
     }
 }

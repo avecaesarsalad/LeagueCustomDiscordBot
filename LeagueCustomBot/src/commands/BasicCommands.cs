@@ -1,5 +1,8 @@
-﻿using DSharpPlus.Entities;
+﻿using System.Text;
+using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
+using LeagueCustomBot.resx;
 using LeagueCustomBot.teamcreator;
 
 namespace LeagueCustomBot.commands;
@@ -9,22 +12,19 @@ public class BasicCommands : ApplicationCommandModule
     [SlashCommand("start-lobby", "starts a new lobby")]
     public async Task StartLobby(InteractionContext ctx)
     {
-        await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().WithContent(TeamCreator.Instance.StartLobby()));
+        await StaticCommands.StartLobby(ctx.Interaction);
     }
 
     [SlashCommand("restart-lobby", "restarts the lobby")]
     public async Task RestartLobby(InteractionContext ctx)
     {
-        await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().WithContent(TeamCreator.Instance.RestartLobby()));
-    }
+        await Functions.DeleteLastMessages(ctx.Interaction);
+        TeamCreator.Instance.RestartLobby();
 
-    [SlashCommand("print-lobby", "Prints the current members of the lobby")]
-    public async Task PrintLobby(InteractionContext ctx)
-    {
-        await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().WithContent(TeamCreator.Instance.ShowLobby()));
+        var builder = new DiscordInteractionResponseBuilder()
+            .WithContent(BotResources.LobbyRestarted);
+
+        await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, builder);
     }
 
     [SlashCommand("join-lobby", "Joins lobby")]
@@ -34,15 +34,62 @@ public class BasicCommands : ApplicationCommandModule
         [Option("SecondRole", "Select your second role")]
         Role role2)
     {
-        var player = new Player
+        await Functions.DeleteLastMessages(ctx.Interaction);
+
+        var builder = new DiscordInteractionResponseBuilder();
+
+        if (!TeamCreator.Instance.LobbyRunning())
         {
-            Name = ctx.Interaction.User.GlobalName,
-            FirstRole = role1,
-            SecondRole = role2,
-            Rank = rank,
-        };
-        await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().WithContent(TeamCreator.Instance.AddPlayerToList(player)));
+            builder = builder.WithContent(BotResources.LobbyNotRunning)
+                .AddComponents(Buttons.StartLobbyButton);
+        }
+        else if (TeamCreator.Instance.LobbyFull())
+        {
+            var stringBuilder = new StringBuilder();
+
+            stringBuilder.AppendLine(BotResources.LobbyFullAlready);
+            stringBuilder.AppendLine("");
+            stringBuilder.AppendLine(TeamCreator.Instance.PrintLobbyMembers());
+
+            builder = builder.WithContent(stringBuilder.ToString())
+                .AddComponents(Buttons.RollTeamsButton);
+        }
+        else
+        {
+            var player = new Player
+            {
+                Name = ctx.Interaction.User.GlobalName,
+                FirstRole = role1,
+                SecondRole = role2,
+                Rank = rank,
+            };
+
+            var added = TeamCreator.Instance.AddPlayerToList(player);
+
+            if (added)
+            {
+                var stringBuilder = new StringBuilder();
+                stringBuilder.AppendLine(string.Format(BotResources.PlayerAdded, player.Name));
+                stringBuilder.AppendLine("");
+                stringBuilder.AppendLine(TeamCreator.Instance.PrintLobbyMembers());
+                builder = builder.WithContent(stringBuilder.ToString());
+
+                if (TeamCreator.Instance.LobbyFull())
+                {
+                    builder.AddComponents(Buttons.RollTeamsButton);
+                }
+            }
+            else
+            {
+                var stringBuilder = new StringBuilder();
+                stringBuilder.AppendLine(string.Format(BotResources.PlayerAlreadyInLobby, player.Name));
+                stringBuilder.AppendLine("");
+                stringBuilder.AppendLine(TeamCreator.Instance.PrintLobbyMembers());
+                builder = builder.WithContent(stringBuilder.ToString());
+            }
+        }
+
+        await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, builder);
     }
 
     [SlashCommand("remove-player", "Removes player from lobby")]
@@ -50,24 +97,44 @@ public class BasicCommands : ApplicationCommandModule
         [Option("Name", "Type in the name of the person to be removed")]
         string name)
     {
-        var removed = TeamCreator.Instance.RemovePlayerFromList(name);
+        await Functions.DeleteLastMessages(ctx.Interaction);
 
-        if (removed)
+        var builder = new DiscordInteractionResponseBuilder();
+
+        if (!TeamCreator.Instance.LobbyRunning())
         {
-            await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
-                new DiscordInteractionResponseBuilder().WithContent("Player " + name + " removed!"));
+            builder = builder.WithContent(BotResources.LobbyNotRunning)
+                .AddComponents(Buttons.StartLobbyButton);
         }
         else
         {
-            await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
-                new DiscordInteractionResponseBuilder().WithContent("Player " + name + " not found or no lobby running!"));   
+            var removed = TeamCreator.Instance.RemovePlayerFromList(name);
+
+            if (removed)
+            {
+                var stringBuilder = new StringBuilder();
+                stringBuilder.AppendLine(string.Format(BotResources.PlayerRemoved, name));
+                stringBuilder.AppendLine("");
+                stringBuilder.AppendLine(TeamCreator.Instance.PrintLobbyMembers());
+
+                builder = builder.WithContent(stringBuilder.ToString());
+            }
+            else
+            {
+                var stringBuilder = new StringBuilder();
+                stringBuilder.AppendLine(string.Format(BotResources.PlayerNotFound, name));
+                stringBuilder.AppendLine("");
+                stringBuilder.AppendLine(TeamCreator.Instance.PrintLobbyMembers());
+                builder = builder.WithContent(stringBuilder.ToString());
+            }
         }
+
+        await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, builder);
     }
-    
+
     [SlashCommand("roll-teams", "Rolls Teams!")]
     public async Task RollTeams(InteractionContext ctx)
     {
-        await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().WithContent(TeamCreator.Instance.Roll()));   
+        await StaticCommands.RollTeams(ctx.Interaction);
     }
 }

@@ -34,3 +34,6 @@ C:\Users\japog\RiderProjects\LeagueCustomBot\LeagueCustomBot\obj\Debug\net8.0\re
 C:\Users\japog\RiderProjects\LeagueCustomBot\LeagueCustomBot\obj\Debug\net8.0\LeagueCustomBot.pdb
 C:\Users\japog\RiderProjects\LeagueCustomBot\LeagueCustomBot\obj\Debug\net8.0\LeagueCustomBot.genruntimeconfig.cache
 C:\Users\japog\RiderProjects\LeagueCustomBot\LeagueCustomBot\obj\Debug\net8.0\ref\LeagueCustomBot.dll
+C:\Users\japog\RiderProjects\LeagueCustomBot\LeagueCustomBot\obj\Debug\net8.0\LeagueCustomBot.sourcelink.json
+C:\Users\japog\RiderProjects\LeagueCustomBot\LeagueCustomBot\obj\Debug\net8.0\LeagueCustomBot.resx.BotResources.resources
+C:\Users\japog\RiderProjects\LeagueCustomBot\LeagueCustomBot\obj\Debug\net8.0\LeagueCustomBot.csproj.GenerateResource.cache

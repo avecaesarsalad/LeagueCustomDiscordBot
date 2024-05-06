@@ -1,8 +1,12 @@
-﻿using DSharpPlus;
+﻿using System.Text;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
 using LeagueCustomBot.commands;
 using LeagueCustomBot.json;
+using LeagueCustomBot.resx;
 using LeagueCustomBot.teamcreator;
 
 namespace LeagueCustomBot;
@@ -11,6 +15,7 @@ internal static class Program
 {
     private static DiscordClient Client { get; set; } = null!;
     private static CommandsNextExtension Commands { get; set; } = null!;
+    private static SlashCommandsExtension SlashCommands { get; set; } = null!;
 
     [Obsolete("Obsolete")]
     static async Task Main(string[] args)
@@ -27,13 +32,31 @@ internal static class Program
         };
 
         Client = new DiscordClient(discordConfig);
+
+        Client.ComponentInteractionCreated += Client_ComponentInteractionCreated;
         
-        var slashCommandConfiguration = Client.UseSlashCommands();
+        SlashCommands = Client.UseSlashCommands();
         
-        slashCommandConfiguration.RegisterCommands<BasicCommands>();
+        SlashCommands.RegisterCommands<BasicCommands>();
         
 
         await Client.ConnectAsync();
         await Task.Delay(-1);
+    }
+
+    private static async Task Client_ComponentInteractionCreated(DiscordClient sender,
+        ComponentInteractionCreateEventArgs args)
+    {
+        switch (args.Interaction.Data.CustomId)
+        {
+            case "start":
+                await StaticCommands.StartLobby(args.Interaction);
+                break;
+            case "roll":
+                await StaticCommands.RollTeams(args.Interaction);
+                break;
+            default:
+                break;
+        }
     }
 }
