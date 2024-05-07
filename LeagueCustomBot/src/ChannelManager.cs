@@ -7,6 +7,7 @@ namespace LeagueCustomBot
         private static ChannelManager? _instance;
         public ulong? RedTeamChannelId;
         public ulong? BlueTeamChannelId;
+        public ulong? BaseChannelId;
         
         public static ChannelManager GetInstance()
         {

@@ -9,6 +9,7 @@ internal class JsonReader
     public string Prefix { get; set; } = "";
     public ulong? RedTeamChannelId { get; set; }
     public ulong? BlueTeamChannelId { get; set; }
+    public ulong? BaseChannelId { get; set; }
     
     public async Task ReadJson(JsonTypes jsonType)
     {
@@ -38,6 +39,7 @@ internal class JsonReader
                 {
                     this.RedTeamChannelId = dataChannels.RedTeamChannelId;
                     this.BlueTeamChannelId = dataChannels.BlueTeamChannelId;
+                    this.BaseChannelId = dataChannels.BaseChannelId;
                 }
                 break;
             default:
@@ -45,12 +47,13 @@ internal class JsonReader
         }
     }
     
-    public async Task WriteToJson(ulong redTeamChannelId, ulong blueTeamChannelId)
+    public async Task WriteToJson(ulong redTeamChannelId, ulong blueTeamChannelId, ulong baseChannelId)
     {
         var data = new JsonStructureChannels()
         {
             RedTeamChannelId = redTeamChannelId,
-            BlueTeamChannelId = blueTeamChannelId
+            BlueTeamChannelId = blueTeamChannelId,
+            BaseChannelId = baseChannelId,
         };
 
         var json = JsonConvert.SerializeObject(data);
@@ -70,4 +73,5 @@ internal sealed class JsonStructureChannels
 {
     public ulong? RedTeamChannelId { get; set; }
     public ulong? BlueTeamChannelId { get; set; }
+    public ulong? BaseChannelId { get; set; }
 }

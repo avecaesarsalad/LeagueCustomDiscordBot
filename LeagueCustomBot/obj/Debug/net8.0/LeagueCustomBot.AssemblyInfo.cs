@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LeagueCustomBot")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c86f95bfb72ec0808061e05edd7c77f90b6c40e0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+baab23cf6f5f711ee1947477916f1cd22e8db04a")]
 [assembly: System.Reflection.AssemblyProductAttribute("LeagueCustomBot")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LeagueCustomBot")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

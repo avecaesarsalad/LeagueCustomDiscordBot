@@ -201,8 +201,9 @@ public class BasicCommands : ApplicationCommandModule
         await StaticCommands.MoveTeamsToChannels(ctx.Interaction);
     }
 
-    [SlashCommand("setup-team-channels", "Setups the channels for the teams!")]
+    [SlashCommand("setup-channels", "Setups the channels for the teams!")]
     public async Task MoveTeamsToChannels(InteractionContext ctx,
+        [Option("BaseChannel", "Base Channel")] DiscordChannel baseChannel,
         [Option("BlueChannel", "Channel for blue team")] DiscordChannel blueChannel,
         [Option("RedChannel", "Channel for red team")] DiscordChannel redChannel)
     {
@@ -210,22 +211,30 @@ public class BasicCommands : ApplicationCommandModule
         
         var builder = new DiscordInteractionResponseBuilder();
 
-        if (redChannel.Type != DiscordChannelType.Voice || blueChannel.Type != DiscordChannelType.Voice)
+        if (redChannel.Type != DiscordChannelType.Voice || blueChannel.Type != DiscordChannelType.Voice || baseChannel.Type != DiscordChannelType.Voice)
         {
             builder = builder.WithContent(BotResources.ChannelsNeedToBeVoiceChannels);
         }
         else
         {
             builder = builder.WithContent(string.Format(BotResources.ChannelsSpecified, blueChannel.Id,
-                redChannel.Id));
+                redChannel.Id, baseChannel.Id));
 
             ChannelManager.GetInstance().BlueTeamChannelId = blueChannel.Id;
             ChannelManager.GetInstance().RedTeamChannelId = redChannel.Id;
+            ChannelManager.GetInstance().BaseChannelId = baseChannel.Id;
 
             var jsonReader = new JsonReader();
-            await jsonReader.WriteToJson(redChannel.Id, blueChannel.Id);
+            await jsonReader.WriteToJson(redChannel.Id, blueChannel.Id, baseChannel.Id);
         }
 
         await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, builder);
     }
+    
+    [SlashCommand("move-back", "Moves Teams back to base channel")]
+    public async Task MoveTeamsBack(InteractionContext ctx)
+    {
+        await StaticCommands.MoveTeamsBackToBaseChannel(ctx.Interaction);
+    }
+    
 }

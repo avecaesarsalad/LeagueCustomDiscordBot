@@ -60,7 +60,7 @@ namespace LeagueCustomBot.resx {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Channels need to be setup first! Use /setup-team-channels.
+        ///   Looks up a localized string similar to Channels need to be setup first! Use /setup-channels.
         /// </summary>
         internal static string ChannelsNeedToBeSetup {
             get {
@@ -69,7 +69,7 @@ namespace LeagueCustomBot.resx {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Both Channels have to be voice Channels!.
+        ///   Looks up a localized string similar to All Channels have to be voice Channels!.
         /// </summary>
         internal static string ChannelsNeedToBeVoiceChannels {
             get {
@@ -78,8 +78,7 @@ namespace LeagueCustomBot.resx {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Channels setup! Blue Team Channel: &lt;#{0}&gt; Red Team Channel: &lt;#{1}&gt;
-        ///.
+        ///   Looks up a localized string similar to Channels setup! Blue Team Channel: &lt;#{0}&gt; Red Team Channel: &lt;#{1}&gt; Base Team Channel: &lt;#{2}&gt;.
         /// </summary>
         internal static string ChannelsSpecified {
             get {

@@ -47,10 +47,11 @@ namespace LeagueCustomBot
 
             ChannelManagerInstance = ChannelManager.GetInstance();
 
-            if (jsonReader is { BlueTeamChannelId: not null, RedTeamChannelId: not null })
+            if (jsonReader is { BlueTeamChannelId: not null, RedTeamChannelId: not null, BaseChannelId: not null, })
             {
                 ChannelManagerInstance.BlueTeamChannelId = jsonReader.BlueTeamChannelId.Value;
                 ChannelManagerInstance.RedTeamChannelId = jsonReader.RedTeamChannelId.Value;
+                ChannelManagerInstance.BaseChannelId = jsonReader.BaseChannelId.Value;
             }
             
             await Task.Delay(-1);
@@ -72,6 +73,9 @@ namespace LeagueCustomBot
                     break;
                 case "move":
                     await StaticCommands.MoveTeamsToChannels(args.Interaction);
+                    break;
+                case "moveback":
+                    await StaticCommands.MoveTeamsBackToBaseChannel(args.Interaction);
                     break;
                 default:
                     break;

@@ -16,7 +16,8 @@ public static class StaticCommands
         if (lobbyStarted)
         {
             var builder = new DiscordInteractionResponseBuilder()
-                .WithContent(string.Format(BotResources.LobbyStarted, interaction.Guild.Members[interaction.User.Id].DisplayName));
+                .WithContent(string.Format(BotResources.LobbyStarted,
+                    interaction.Guild.Members[interaction.User.Id].DisplayName));
 
             await interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, builder);
         }
@@ -46,7 +47,7 @@ public static class StaticCommands
                 stringBuilder.AppendLine(showLobby);
 
                 await interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
-                    new DiscordInteractionResponseBuilder().WithContent(stringBuilder.ToString()));   
+                    new DiscordInteractionResponseBuilder().WithContent(stringBuilder.ToString()));
             }
         }
     }
@@ -113,7 +114,8 @@ public static class StaticCommands
 
                 builder = builder.WithContent(stringBuilder.ToString())
                     .AddComponents(Buttons.RerollTeamsButton)
-                    .AddComponents(Buttons.MoveTeamsButton);
+                    .AddComponents(Buttons.MoveTeamsButton)  
+                    .AddComponents(Buttons.MoveTeamsBackButton);
             }
             else
             {
@@ -127,7 +129,6 @@ public static class StaticCommands
 
     public static async Task MoveTeamsToChannels(DiscordInteraction interaction)
     {
-        
         await Functions.DeleteLastMessages(interaction);
 
         var builder = new DiscordInteractionResponseBuilder();
@@ -193,7 +194,7 @@ public static class StaticCommands
                         }
                     });
 
-                    await Task.WhenAll(redTeamTasks.Concat(blueTeamTasks));   
+                    await Task.WhenAll(redTeamTasks.Concat(blueTeamTasks));
                 }
 
                 var stringBuilder = new StringBuilder();
@@ -205,7 +206,84 @@ public static class StaticCommands
 
                 builder = builder.WithContent(stringBuilder.ToString())
                     .AddComponents(Buttons.RerollTeamsButton)
-                    .AddComponents(Buttons.MoveTeamsButton);
+                    .AddComponents(Buttons.MoveTeamsButton)
+                    .AddComponents(Buttons.MoveTeamsBackButton);
+            }
+        }
+
+        await interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, builder);
+    }
+
+    public static async Task MoveTeamsBackToBaseChannel(DiscordInteraction interaction)
+    {
+        await Functions.DeleteLastMessages(interaction);
+
+        var builder = new DiscordInteractionResponseBuilder();
+
+        if (!TeamCreator.Instance.LobbyRunning())
+        {
+            builder = builder.WithContent(BotResources.LobbyNotRunning)
+                .AddComponents(Buttons.StartLobbyButton);
+        }
+        else if (!TeamCreator.Instance.LobbyFull())
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine(BotResources.LobbyNotFull);
+            stringBuilder.AppendLine("");
+            stringBuilder.AppendLine(TeamCreator.Instance.PrintLobbyMembers());
+
+            builder = builder.WithContent(stringBuilder.ToString());
+        }
+        else if (!TeamCreator.Instance.GetRolled())
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine(BotResources.LobbyNotRolled);
+            stringBuilder.AppendLine("");
+            stringBuilder.AppendLine(TeamCreator.Instance.PrintLobbyMembers());
+
+            builder = builder.WithContent(stringBuilder.ToString())
+                .AddComponents(Buttons.RollTeamsButton);
+        }
+        else if (!ChannelManager.GetInstance().BaseChannelId.HasValue)
+        {
+            builder = builder.WithContent(BotResources.ChannelsNeedToBeSetup);
+        }
+        else
+        {
+            var baseChannel = interaction.Guild.GetChannel(ChannelManager.GetInstance().BaseChannelId!.Value);
+
+            if (baseChannel is null)
+            {
+                builder = builder.WithContent(BotResources.ChannelsNeedToBeSetup);
+            }
+            else
+            {
+                if (TeamCreator.Instance.GetLobbyMasterName() ==
+                    interaction.Guild.Members[interaction.User.Id].DisplayName)
+                {
+                    var teamTasks = TeamCreator.Instance.GetAllPlayers().Select(async player =>
+                    {
+                        var member = await interaction.Guild.GetMemberAsync(player.Id);
+                        if (member != null)
+                        {
+                            await member.ModifyAsync(x => x.VoiceChannel = baseChannel);
+                        }
+                    });
+
+                    await Task.WhenAll(teamTasks);
+                }
+
+                var stringBuilder = new StringBuilder();
+                stringBuilder.AppendLine(BotResources.Rolled);
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine(TeamCreator.Instance.PrintTeams());
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine(BotResources.WantToReroll);
+
+                builder = builder.WithContent(stringBuilder.ToString())
+                    .AddComponents(Buttons.RerollTeamsButton)
+                    .AddComponents(Buttons.MoveTeamsButton)
+                    .AddComponents(Buttons.MoveTeamsBackButton);
             }
         }
 

@@ -10,7 +10,7 @@ namespace LeagueCustomBot.teamcreator
     public class TeamCreator
     {
         private static TeamCreator? _instance;
-        private static readonly Random Random = new Random(Guid.NewGuid().GetHashCode());
+        private static readonly Random Random = new(Guid.NewGuid().GetHashCode());
 
 
         private bool _lobbyRunning;
@@ -18,9 +18,9 @@ namespace LeagueCustomBot.teamcreator
         private bool _rolled;
         private const int LobbyCount = 10;
 
-        private List<Player> _allPlayers = new();
-        private List<Player> _redPlayers = new();
-        private List<Player> _bluePlayers = new();
+        private List<Player> _allPlayers = [];
+        private List<Player> _redPlayers = [];
+        private List<Player> _bluePlayers = [];
 
         public static TeamCreator Instance
         {
@@ -365,6 +365,11 @@ namespace LeagueCustomBot.teamcreator
         public bool GetRolled()
         {
             return _rolled;
+        }
+
+        public List<Player> GetAllPlayers()
+        {
+            return _allPlayers;
         }
     }
 }
