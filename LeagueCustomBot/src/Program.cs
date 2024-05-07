@@ -17,13 +17,15 @@ namespace LeagueCustomBot
     {
         private static DiscordClient Client { get; set; } = null!;
         private static CommandsNextExtension Commands { get; set; } = null!;
+        private static ChannelManager ChannelManagerInstance { get; set; } = null!;
         [Obsolete("Obsolete")] private static SlashCommandsExtension SlashCommands { get; set; } = null!;
 
         [Obsolete("Obsolete")]
         static async Task Main(string[] args)
         {
             var jsonReader = new JsonReader();
-            await jsonReader.ReadJson();
+            await jsonReader.ReadJson(JsonTypes.Config);
+            await jsonReader.ReadJson(JsonTypes.Channels);
 
             var discordConfig = new DiscordConfiguration()
             {
@@ -41,9 +43,18 @@ namespace LeagueCustomBot
 
             SlashCommands.RegisterCommands<BasicCommands>();
 
-        await Client.ConnectAsync();
-        await Task.Delay(-1);
-    }
+            await Client.ConnectAsync();
+
+            ChannelManagerInstance = ChannelManager.GetInstance();
+
+            if (jsonReader is { BlueTeamChannelId: not null, RedTeamChannelId: not null })
+            {
+                ChannelManagerInstance.BlueTeamChannelId = jsonReader.BlueTeamChannelId.Value;
+                ChannelManagerInstance.RedTeamChannelId = jsonReader.RedTeamChannelId.Value;
+            }
+            
+            await Task.Delay(-1);
+        }
 
         private static async Task Client_ComponentInteractionCreated(DiscordClient sender,
             ComponentInteractionCreateEventArgs args)
@@ -55,6 +66,12 @@ namespace LeagueCustomBot
                     break;
                 case "roll":
                     await StaticCommands.RollTeams(args.Interaction);
+                    break;
+                case "reroll":
+                    await StaticCommands.RollTeams(args.Interaction);
+                    break;
+                case "move":
+                    await StaticCommands.MoveTeamsToChannels(args.Interaction);
                     break;
                 default:
                     break;

@@ -10,9 +10,13 @@ namespace LeagueCustomBot.teamcreator
     public class TeamCreator
     {
         private static TeamCreator? _instance;
-        private static readonly Random Random = new();
+        private static readonly Random Random = new Random(Guid.NewGuid().GetHashCode());
+
 
         private bool _lobbyRunning;
+        private string _lobbyStartedByName = ""; 
+        private bool _rolled;
+        private const int LobbyCount = 10;
 
         private List<Player> _allPlayers = new();
         private List<Player> _redPlayers = new();
@@ -28,9 +32,9 @@ namespace LeagueCustomBot.teamcreator
             
             if (!_lobbyRunning) return false;
 
-            if (_allPlayers.Count >= 10) return false;
+            if (_allPlayers.Count >= LobbyCount) return false;
 
-            if (_allPlayers.FirstOrDefault(x => x.Name == player.Name) != null) return false;
+            //if (_allPlayers.FirstOrDefault(x => x.Name == player.Name) != null) return false;
 
             _allPlayers.Add(player);
             return true;
@@ -46,6 +50,19 @@ namespace LeagueCustomBot.teamcreator
             return true;
         }
 
+        public bool ChangePlayerInformation(Player newPlayerInfo)
+        {
+            if (!_lobbyRunning) return false;
+
+            var playerToChange = _allPlayers.FirstOrDefault(x => x.Name == newPlayerInfo.Name);
+            if(playerToChange == null) return false;
+
+            playerToChange.FirstRole = newPlayerInfo.FirstRole;
+            playerToChange.SecondRole = newPlayerInfo.SecondRole;
+            playerToChange.Rank = newPlayerInfo.Rank;
+            return true;
+        }
+
         public bool PlayerExists(string name)
         {
             return _allPlayers.FirstOrDefault(x => x.Name == name) != null;
@@ -55,7 +72,7 @@ namespace LeagueCustomBot.teamcreator
         {
             if (!_lobbyRunning) return false;
 
-            if (_allPlayers.Count < 10) return false;
+            if (_allPlayers.Count < LobbyCount) return false;
             
             RollTeams();
             RollRoles(_redPlayers);
@@ -65,9 +82,9 @@ namespace LeagueCustomBot.teamcreator
 
         private void RollTeams()
         {
-            for (var i = 0; i <= 5; i++)
+            for (var i = 0; i <= (LobbyCount/2); i++)
             {
-                for (var x = 0; x < 10; x++)
+                for (var x = 0; x < LobbyCount; x++)
                 {
                     RollPlayers();
                     var td = GetTeamScoreDifference();
@@ -79,50 +96,44 @@ namespace LeagueCustomBot.teamcreator
         private void RollRoles(List<Player> team)
         {
             var randomTeam = Shuffle(team);
+            ResetRoles(randomTeam);
+            AssignFirstRoles(randomTeam);
+            AssignSecondRoles(randomTeam);
+            AssignRandomRoles(randomTeam);
+            team = randomTeam;
+        }
 
-            foreach (var player in randomTeam)
+        private void ResetRoles(List<Player> team)
+        {
+            team.ForEach(player => player.SelectedRole = Role.Fill);
+        }
+
+        private void AssignFirstRoles(List<Player> team)
+        {
+            foreach (var player in team.Where(player => player.FirstRole != Role.Fill && RoleFree(team, player.FirstRole)))
             {
-                if (player.FirstRole == Role.Fill)
-                {
-                    break;
-                }
-                else
-                {
-                    if (RoleFree(randomTeam, player.FirstRole))
-                    {
-                        player.SelectedRole = player.FirstRole;
-                    }
-                    else
-                    {
-                        if (player.SecondRole == Role.Fill)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            if (RoleFree(randomTeam, player.SecondRole))
-                            {
-                                player.SelectedRole = player.SecondRole;
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                    }
-                }
+                player.SelectedRole = player.FirstRole;
             }
+        }
 
-            foreach (var player in randomTeam.Where(x => x.SelectedRole == Role.Fill))
+        private void AssignSecondRoles(List<Player> team)
+        {
+            foreach (var player in team.Where(player => player.SecondRole != Role.Fill && RoleFree(team, player.SecondRole)))
+            {
+                player.SelectedRole = player.SecondRole;
+            }
+        }
+
+        private void AssignRandomRoles(List<Player> team)
+        {
+            foreach (var player in team.Where(player => player.SelectedRole == Role.Fill))
             {
                 for (var i = 1; i < 6; i++)
                 {
-                    var roleFree = RoleFree(randomTeam, (Role)i);
+                    var roleFree = RoleFree(team, (Role)i);
                     if (roleFree) player.SelectedRole = (Role)i;
                 }
             }
-
-            team = randomTeam;
         }
 
         private bool RoleFree(List<Player> team, Role role)
@@ -132,7 +143,7 @@ namespace LeagueCustomBot.teamcreator
 
         private bool RollPlayers()
         {
-            if (_allPlayers.Count < 10) return false;
+            if (_allPlayers.Count < LobbyCount) return false;
 
             _redPlayers.Clear();
             _bluePlayers.Clear();
@@ -160,17 +171,17 @@ namespace LeagueCustomBot.teamcreator
                 var blueScore = _bluePlayers.Sum(x => (int)x.Rank);
                 var redScore = _redPlayers.Sum(x => (int)x.Rank);
 
-                if (_bluePlayers.Count < 5 && blueScore < redScore)
+                if (_bluePlayers.Count < (LobbyCount) && blueScore < redScore)
                 {
                     _bluePlayers.Add(sortedList[0]);
                     sortedList.RemoveAt(0);
                 }
-                else if (_redPlayers.Count < 5 && redScore < blueScore)
+                else if (_redPlayers.Count < (LobbyCount/2) && redScore < blueScore)
                 {
                     _redPlayers.Add(sortedList[0]);
                     sortedList.RemoveAt(0);
                 }
-                else if (_bluePlayers.Count < 5)
+                else if (_bluePlayers.Count < (LobbyCount/2))
                 {
                     _bluePlayers.Add(sortedList[0]);
                     sortedList.RemoveAt(0);
@@ -200,7 +211,7 @@ namespace LeagueCustomBot.teamcreator
         public string PrintLobbyMembers()
         {
             var output = new StringBuilder();
-            output.AppendLine("**Current Lobby (" + _allPlayers.Count + "/10):**");
+            output.AppendLine("**Current Lobby (" + _allPlayers.Count + "/" + LobbyCount + "):**");
 
             if (_allPlayers.Count > 0)
             {
@@ -209,16 +220,16 @@ namespace LeagueCustomBot.teamcreator
                 var maxSecondRoleLength = _allPlayers.Max(player => player.SecondRole.ToString().Length);
                 var maxRatingLength = _allPlayers.Max(player => player.Rank.ToString().Length);
                 
-                var format = "Name: **{0,-" + (maxNameLength + 2) + "}** 1: **{1,-" + (maxFirstRoleLength + 6) + "}** 2: **{2,-" + (maxSecondRoleLength + 6) + "}** Rating: **{3,-" + (maxRatingLength + 2) + "}**";
+                var format = "**{0,-" + (maxNameLength + 2) + "}** **{1,-" + (maxFirstRoleLength + 6) + "}** **{2,-" + (maxSecondRoleLength + 6) + "}** **{3,-" + (maxRatingLength + 2) + "}**";
 
                 foreach (var player in _allPlayers)
                 {
                     output.AppendLine(string.Format(format, player.Name, player.FirstRole, player.SecondRole, player.Rank));
                 }
 
-                if (_allPlayers.Count == 10)
+                if (_allPlayers.Count == LobbyCount)
                 {
-                    output.AppendLine(BotResources.LobbyReady);
+                    output.AppendLine(string.Format(BotResources.LobbyReady, _lobbyStartedByName));
                 }
             }
     
@@ -233,22 +244,32 @@ namespace LeagueCustomBot.teamcreator
             var sortByRoleRed = SortByRole(_redPlayers);
             var sortByRoleBlue = SortByRole(_bluePlayers);
 
-            output.AppendLine("Red Team:");
+
+            output.AppendLine("**Blue Team (Team 1):**");
+            if (ChannelManager.GetInstance().BlueTeamChannelId != null)
+            {
+                output.AppendLine("<#" + ChannelManager.GetInstance().BlueTeamChannelId + ">");
+            }
+            foreach (var bPlayer in sortByRoleBlue)
+            {
+                output.AppendLine(bPlayer.Name + "[" + (bPlayer.Rank) + "] : " + bPlayer.SelectedRole);
+            }
+
+            output.AppendLine("**Total score: " + _bluePlayers.Sum(x => (int)x.Rank) + "**");
+            output.AppendLine();
+
+            output.AppendLine("**Red Team (Team 2):**");
+            if (ChannelManager.GetInstance().RedTeamChannelId != null)
+            {
+                output.AppendLine("<#" + ChannelManager.GetInstance().RedTeamChannelId + ">");
+            }
             foreach (var rPlayer in sortByRoleRed)
             {
                 output.AppendLine(rPlayer.Name + "(" + (rPlayer.Rank) + ") : " + rPlayer.SelectedRole);
             }
-            output.AppendLine("Total score: " + _redPlayers.Sum(x => (int)x.Rank));
+            output.AppendLine("**Total score: " + _redPlayers.Sum(x => (int)x.Rank) + "**");
             output.AppendLine();
-
-            output.AppendLine("Blue Team:");
-            foreach (var bPlayer in sortByRoleBlue)
-            {
-                output.AppendLine(bPlayer.Name + "(" + (bPlayer.Rank) + ") : " + bPlayer.SelectedRole);
-            }
-            output.AppendLine("Total score: " + _bluePlayers.Sum(x => (int)x.Rank));
-            output.AppendLine();
-
+            
             output.AppendLine("Teamdiff: " + GetTeamScoreDifference() + " Rank");
 
             return output.ToString();
@@ -284,33 +305,56 @@ namespace LeagueCustomBot.teamcreator
             }
         }
 
-        public bool StartLobby()
+        public bool StartLobby(string starterName)
         {
             if (_lobbyRunning) return false;
             
-            _lobbyRunning = true;
-            _allPlayers = [];
-            _redPlayers = [];
-            _bluePlayers = [];
+            RestartLobby(starterName);
             return true;
         }
 
-        public void RestartLobby()
+        public void RestartLobby(string starterName)
         {
             _lobbyRunning = true;
             _allPlayers = [];
             _redPlayers = [];
             _bluePlayers = [];
+            _lobbyStartedByName = starterName;
         }
 
         public bool LobbyFull()
         {
-            return _allPlayers.Count == 10;
+            return _allPlayers.Count == LobbyCount;
         }
 
         public bool LobbyRunning()
         {
             return _lobbyRunning;
+        }
+
+        public string GetLobbyMasterName()
+        {
+            return _lobbyStartedByName;
+        }
+
+        public List<Player> GetRedTeam()
+        {
+            return _redPlayers;
+        }
+
+        public List<Player> GetBlueTeam()
+        {
+            return _bluePlayers;
+        }
+
+        public void SetRolled(bool rolled)
+        {
+            _rolled = rolled;
+        }
+
+        public bool GetRolled()
+        {
+            return _rolled;
         }
     }
 }

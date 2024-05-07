@@ -60,6 +60,34 @@ namespace LeagueCustomBot.resx {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Channels need to be setup first! Use /setup-team-channels.
+        /// </summary>
+        internal static string ChannelsNeedToBeSetup {
+            get {
+                return ResourceManager.GetString("ChannelsNeedToBeSetup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Both Channels have to be voice Channels!.
+        /// </summary>
+        internal static string ChannelsNeedToBeVoiceChannels {
+            get {
+                return ResourceManager.GetString("ChannelsNeedToBeVoiceChannels", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Channels setup! Blue Team Channel: &lt;#{0}&gt; Red Team Channel: &lt;#{1}&gt;
+        ///.
+        /// </summary>
+        internal static string ChannelsSpecified {
+            get {
+                return ResourceManager.GetString("ChannelsSpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to **An Error occured**.
         /// </summary>
         internal static string Error {
@@ -105,7 +133,16 @@ namespace LeagueCustomBot.resx {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to **Lobby is not started!** Please use **/start-lobby** or press the Button!.
+        ///   Looks up a localized string similar to Lobby needs to be rolled first! /roll.
+        /// </summary>
+        internal static string LobbyNotRolled {
+            get {
+                return ResourceManager.GetString("LobbyNotRolled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to **Lobby is not started!** Please use **/start** or press the Button!.
         /// </summary>
         internal static string LobbyNotRunning {
             get {
@@ -114,7 +151,7 @@ namespace LeagueCustomBot.resx {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Lobby is ready! Roll teams by using /roll-teams or by pressing the button!.
+        ///   Looks up a localized string similar to Lobby is ready! Roll Master *({0})* can now roll teams by using /roll or by pressing the button!.
         /// </summary>
         internal static string LobbyReady {
             get {
@@ -123,7 +160,7 @@ namespace LeagueCustomBot.resx {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to **Lobby was restarted!** All Lobby Members removed! You can now use **/join-lobby** or **/remove-player**.
+        ///   Looks up a localized string similar to **Lobby was restarted!** All Lobby Members removed! You can now use **/join** or **/remove**! Roll Master: **{0}**.
         /// </summary>
         internal static string LobbyRestarted {
             get {
@@ -132,11 +169,20 @@ namespace LeagueCustomBot.resx {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to **Lobby was started!** You can now use **/join-lobby** or **/remove-player**.
+        ///   Looks up a localized string similar to **Lobby was started!** You can now use **/join** or **/remove**! Roll Master: **{0}**.
         /// </summary>
         internal static string LobbyStarted {
             get {
                 return ResourceManager.GetString("LobbyStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only the Roll Master ({0}) can roll!.
+        /// </summary>
+        internal static string OnlyRollMasterCanRoll {
+            get {
+                return ResourceManager.GetString("OnlyRollMasterCanRoll", resourceCulture);
             }
         }
         
@@ -155,6 +201,15 @@ namespace LeagueCustomBot.resx {
         internal static string PlayerAlreadyInLobby {
             get {
                 return ResourceManager.GetString("PlayerAlreadyInLobby", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Values of Player {0} were changed!.
+        /// </summary>
+        internal static string PlayerInformationChanged {
+            get {
+                return ResourceManager.GetString("PlayerInformationChanged", resourceCulture);
             }
         }
         
@@ -186,7 +241,7 @@ namespace LeagueCustomBot.resx {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Want to reroll? Just type /roll-teams again or press the button!.
+        ///   Looks up a localized string similar to Want to reroll? Just type /roll again or press the button!.
         /// </summary>
         internal static string WantToReroll {
             get {

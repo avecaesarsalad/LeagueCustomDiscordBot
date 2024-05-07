@@ -25,25 +25,28 @@
         <value>Lobby is currently empty!</value>
     </data>
     <data name="LobbyStarted" xml:space="preserve">
-        <value>**Lobby was started!** You can now use **/join-lobby** or **/remove-player**</value>
+        <value>**Lobby was started!** You can now use **/join** or **/remove**! Roll Master: **{0}**</value>
     </data>
     <data name="LobbyRestarted" xml:space="preserve">
-        <value>**Lobby was restarted!** All Lobby Members removed! You can now use **/join-lobby** or **/remove-player**</value>
+        <value>**Lobby was restarted!** All Lobby Members removed! You can now use **/join** or **/remove**! Roll Master: **{0}**</value>
     </data>
     <data name="LobbyFullAlready" xml:space="preserve">
         <value>Lobby is already Full!</value>
     </data>
     <data name="LobbyNotRunning" xml:space="preserve">
-        <value>**Lobby is not started!** Please use **/start-lobby** or press the Button!</value>
+        <value>**Lobby is not started!** Please use **/start** or press the Button!</value>
     </data>
     <data name="PlayerAdded" xml:space="preserve">
         <value>Player {0} joined the lobby!</value>
     </data>
     <data name="LobbyReady" xml:space="preserve">
-        <value>Lobby is ready! Roll teams by using /roll-teams or by pressing the button!</value>
+        <value>Lobby is ready! Roll Master *({0})* can now roll teams by using /roll or by pressing the button!</value>
     </data>
     <data name="PlayerRemoved" xml:space="preserve">
         <value>Player {0} was removed from the lobby!</value>
+    </data>
+    <data name="PlayerInformationChanged" xml:space="preserve">
+        <value>Values of Player {0} were changed!</value>
     </data>
     <data name="PlayerNotFound" xml:space="preserve">
         <value>Player {0} not found in lobby!</value>
@@ -58,9 +61,25 @@
         <value>Teams rolled:</value>
     </data>
     <data name="WantToReroll" xml:space="preserve">
-        <value>Want to reroll? Just type /roll-teams again or press the button!</value>
+        <value>Want to reroll? Just type /roll again or press the button!</value>
     </data>
     <data name="PlayerAlreadyInLobby" xml:space="preserve">
         <value>Player {0} is already in the Lobby!</value>
+    </data>
+    <data name="OnlyRollMasterCanRoll" xml:space="preserve">
+        <value>Only the Roll Master ({0}) can roll!</value>
+    </data>
+    <data name="ChannelsNeedToBeVoiceChannels" xml:space="preserve">
+        <value>Both Channels have to be voice Channels!</value>
+    </data>
+    <data name="ChannelsSpecified" xml:space="preserve">
+        <value>Channels setup! Blue Team Channel: &lt;#{0}&gt; Red Team Channel: &lt;#{1}&gt;
+</value>
+    </data>
+    <data name="LobbyNotRolled" xml:space="preserve">
+        <value>Lobby needs to be rolled first! /roll</value>
+    </data>
+    <data name="ChannelsNeedToBeSetup" xml:space="preserve">
+        <value>Channels need to be setup first! Use /setup-team-channels</value>
     </data>
 </root>
