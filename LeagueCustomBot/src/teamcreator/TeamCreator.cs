@@ -92,6 +92,11 @@ namespace LeagueCustomBot.teamcreator
                 }
             }
         }
+        
+        /*
+         * Robin: Support, Mid => Mid
+         * AveCaesarSalad: Mid, Top => Support
+         */
 
         private void RollRoles(List<Player> team)
         {
@@ -103,6 +108,7 @@ namespace LeagueCustomBot.teamcreator
             team = randomTeam;
         }
 
+
         private void ResetRoles(List<Player> team)
         {
             team.ForEach(player => player.SelectedRole = Role.Fill);
@@ -110,7 +116,9 @@ namespace LeagueCustomBot.teamcreator
 
         private void AssignFirstRoles(List<Player> team)
         {
-            foreach (var player in team.Where(player => player.FirstRole != Role.Fill && RoleFree(team, player.FirstRole)))
+            foreach (var player in team.Where(player => player.SelectedRole == Role.Fill 
+                                                        && player.FirstRole != Role.Fill 
+                                                        && RoleFree(team, player.FirstRole)))
             {
                 player.SelectedRole = player.FirstRole;
             }
@@ -118,7 +126,9 @@ namespace LeagueCustomBot.teamcreator
 
         private void AssignSecondRoles(List<Player> team)
         {
-            foreach (var player in team.Where(player => player.SecondRole != Role.Fill && RoleFree(team, player.SecondRole)))
+            foreach (var player in team.Where(player => player.SelectedRole == Role.Fill 
+                                                        && player.SecondRole != Role.Fill 
+                                                        && RoleFree(team, player.SecondRole)))
             {
                 player.SelectedRole = player.SecondRole;
             }
@@ -139,6 +149,21 @@ namespace LeagueCustomBot.teamcreator
         private bool RoleFree(List<Player> team, Role role)
         {
             return team.All(x => x.SelectedRole != role);
+        }
+
+        private List<Player> Shuffle(List<Player> list)
+        {
+            var shuffledList = new List<Player>(list);
+
+            var n = shuffledList.Count;
+            while (n > 1)
+            {
+                n--;
+                var k = Random.Next(n + 1);
+                (shuffledList[k], shuffledList[n]) = (shuffledList[n], shuffledList[k]);
+            }
+
+            return shuffledList;
         }
 
         private bool RollPlayers()
@@ -273,21 +298,6 @@ namespace LeagueCustomBot.teamcreator
             output.AppendLine("Teamdiff: " + GetTeamScoreDifference() + " Rank");
 
             return output.ToString();
-        }
-
-        private List<Player> Shuffle(List<Player> list)
-        {
-            var shuffledList = new List<Player>(list);
-
-            var n = shuffledList.Count;
-            while (n > 1)
-            {
-                n--;
-                var k = Random.Next(n + 1);
-                (shuffledList[k], shuffledList[n]) = (shuffledList[n], shuffledList[k]);
-            }
-
-            return shuffledList;
         }
 
         private int GetTeamScoreDifference()
